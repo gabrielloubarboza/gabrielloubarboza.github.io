@@ -646,3 +646,9 @@ a.gpkg:hover { border-color: var(--terra); }
   .card:hover, .contato__cartao:hover { transform: none; }
   .card:hover .card__img img { transform: none; }
 }
+
+/* texto corrido justificado (a hifenização segue o idioma da página) */
+main p:not([class]), .secao__intro, .lead, .card__resumo, .pub__desc, .tcc__resumo, .premio__texto, .aviso, .nota-nome,
+.fontes__nota, .galeria__nota, .mat__nota, .ficha__nota, .pub__nota, .lista-marcada li, .eixos li {
+  text-align: justify; -webkit-hyphens: auto; hyphens: auto;
+}
