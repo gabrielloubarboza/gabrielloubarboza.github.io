@@ -171,18 +171,18 @@
   });
 })();
 
-/* Texto justificado sem hifenização: quando alguma linha fica com espaços largos demais, ajusta a largura da caixa do
-   parágrafo (até 15% mais estreita, ou mais larga até o limite do contêiner) e fica com a largura de espaçamento mais
-   uniforme; se ainda assim sobrarem espaços grandes (coluna estreita), alinha aquele texto à esquerda. Sem JS, o texto
-   continua justificado normalmente. */
+/* Texto justificado sem hifenização, em todas as telas: quando alguma linha fica com espaços largos demais, ajusta a
+   largura da caixa do texto (até 15% mais estreita, ou mais larga até o limite do contêiner) e fica com a largura de
+   espaçamento mais uniforme. Parágrafos de um mesmo texto recebem o mesmo ajuste. Sem JS, o texto continua justificado. */
 (function () {
   "use strict";
 
   var SELETOR = "main p:not([class]), .secao__intro, .lead, .card__resumo, .pub__desc, .tcc__resumo, .premio__texto, " +
     ".aviso, .nota-nome, .fontes__nota, .galeria__nota, .mat__nota, .ficha__nota, .pub__nota, .lista-marcada li, " +
     ".eixos li, .numero__texto";
+  // Colunas de texto contínuo: tudo o que está dentro delas é ajustado em conjunto
+  var COLUNAS = ".proj-texto, .colab__texto, .sobre__texto";
   var LIMITE = 2;      // espaço máximo aceitável entre palavras, em múltiplos do espaço normal
-  var TOLERAVEL = 3;   // acima disso, mesmo após o ajuste, o texto fica alinhado à esquerda
   var VARIACAO = 0.15; // variação máxima testada, em fração da largura original
   var regua = document.createElement("canvas").getContext("2d");
 
@@ -212,57 +212,89 @@
     return maior;
   }
 
-  function ajustar() {
-    var itens = Array.prototype.slice.call(document.querySelectorAll(SELETOR));
-    itens.forEach(function (el) {
-      el.style.maxWidth = el.style.width = el.style.paddingLeft = el.style.paddingRight = el.style.textAlign = "";
-    });
-    itens.forEach(function (el) {
-      if (!el.offsetParent) return;
-      var proprio = getComputedStyle(el);
-      var largura = el.getBoundingClientRect().width;
-      var melhor = { ajuste: 0, folga: folga(el) };
-      if (melhor.folga <= LIMITE) return;
-      var aplicar, minimo, maximo;
-      if (parseFloat(proprio.borderLeftWidth) > 0 || proprio.backgroundColor !== "rgba(0, 0, 0, 0)") {
-        // Cartões (borda ou fundo próprios) mantêm a caixa da grade: varia a margem interna, igual dos dois lados
-        var pe = parseFloat(proprio.paddingLeft), pd = parseFloat(proprio.paddingRight);
-        aplicar = function (a) {
+  function cartao(el) {
+    var s = getComputedStyle(el);
+    return parseFloat(s.borderLeftWidth) > 0 || s.backgroundColor !== "rgba(0, 0, 0, 0)";
+  }
+
+  // Como variar a área de texto de um elemento: aplicar(a) deixa o texto "a" px mais estreito (negativo: mais largo)
+  function regulador(el) {
+    var proprio = getComputedStyle(el), largura = el.getBoundingClientRect().width;
+    if (cartao(el)) {
+      // Cartões (borda ou fundo próprios) mantêm a caixa da grade: varia a margem interna, igual dos dois lados
+      var pe = parseFloat(proprio.paddingLeft), pd = parseFloat(proprio.paddingRight);
+      return {
+        minimo: -Math.max(0, Math.min(pe, pd) - 8) * 2, maximo: largura * VARIACAO,
+        aplicar: function (a) {
           el.style.paddingLeft = a ? pe + a / 2 + "px" : "";
           el.style.paddingRight = a ? pd + a / 2 + "px" : "";
-        };
-        minimo = -Math.max(0, Math.min(pe, pd) - 8) * 2;
-        maximo = largura * VARIACAO;
-      } else {
-        // Parágrafos: varia a largura; só cresce quando limitado por max-width (não pela grade) e até o contêiner
-        var pai = el.parentElement, estilo = getComputedStyle(pai), teto = 0;
-        if (proprio.maxWidth !== "none" && !/grid|flex/.test(estilo.display)) {
-          teto = Math.min(largura * VARIACAO,
-            pai.clientWidth - parseFloat(estilo.paddingLeft) - parseFloat(estilo.paddingRight) - largura);
         }
-        aplicar = function (a) {
-          el.style.width = a ? largura - a + "px" : "";
-          el.style.maxWidth = a ? "none" : "";
-        };
-        minimo = -Math.max(0, teto);
-        maximo = largura * VARIACAO;
+      };
+    }
+    // Parágrafos: varia a largura; só cresce quando limitado por max-width (não pela grade) e até o contêiner
+    var pai = el.parentElement, estilo = getComputedStyle(pai), teto = 0;
+    if (proprio.maxWidth !== "none" && !/grid|flex/.test(estilo.display)) {
+      teto = Math.min(largura * VARIACAO,
+        pai.clientWidth - parseFloat(estilo.paddingLeft) - parseFloat(estilo.paddingRight) - largura);
+    }
+    return {
+      minimo: -Math.max(0, teto), maximo: largura * VARIACAO,
+      aplicar: function (a) {
+        el.style.width = a ? largura - a + "px" : "";
+        el.style.maxWidth = a ? "none" : "";
       }
-      // "ajuste" = quanto a área de texto fica mais estreita (negativo: mais larga); testa alternando os dois sentidos
+    };
+  }
+
+  // Bloco de texto a que o elemento pertence: o contêiner dos parágrafos (para itens de lista, o contêiner da lista).
+  // Cartões e elementos dispostos em grade/colunas são textos isolados (sem bloco)
+  function bloco(el) {
+    if (cartao(el)) return null;
+    var pai = el.parentElement, coluna = el.closest(COLUNAS);
+    if (coluna && !(el.tagName === "LI" && pai.matches(".lista-marcada--colunas"))) return coluna;
+    if (el.tagName === "LI") {
+      if (/grid|flex/.test(getComputedStyle(pai).display)) return null;
+      pai = pai.parentElement;
+    }
+    return /grid|flex/.test(getComputedStyle(pai).display) ? null : pai;
+  }
+
+  // Todos os parágrafos e itens de lista de um mesmo texto formam um grupo e recebem sempre o mesmo ajuste, para manter
+  // as margens alinhadas ao longo do texto; textos isolados e cartões são ajustados um a um
+  function agrupar(itens) {
+    var grupos = [], porBloco = new Map();
+    itens.forEach(function (el) {
+      if (!el.offsetParent) return;
+      var b = bloco(el);
+      if (!b) return grupos.push([el]);
+      if (!porBloco.has(b)) grupos.push(porBloco.set(b, []).get(b));
+      porBloco.get(b).push(el);
+    });
+    return grupos;
+  }
+
+  function ajustar() {
+    var itens = Array.prototype.slice.call(document.querySelectorAll(SELETOR));
+    itens.forEach(function (el) { el.style.maxWidth = el.style.width = el.style.paddingLeft = el.style.paddingRight = ""; });
+    agrupar(itens).forEach(function (grupo) {
+      function folgaGrupo() { return Math.max.apply(null, grupo.map(folga)); }
+      var melhor = { ajuste: 0, folga: folgaGrupo() };
+      if (melhor.folga <= LIMITE) return;
+      var regs = grupo.map(regulador);
+      var minimo = Math.max.apply(null, regs.map(function (r) { return r.minimo; }));
+      var maximo = Math.min.apply(null, regs.map(function (r) { return r.maximo; }));
+      function aplicar(a) { regs.forEach(function (r) { r.aplicar(a); }); }
+      // Testa a partir da largura original, alternando mais estreita e mais larga, e fica com a de menor folga
       for (var d = 4; d <= maximo; d += 4) {
         [d, -d].forEach(function (a) {
           if (a < minimo || melhor.folga <= LIMITE) return;
           aplicar(a);
-          var f = folga(el);
+          var f = folgaGrupo();
           if (f < melhor.folga - 0.2) melhor = { ajuste: a, folga: f };
         });
         if (melhor.folga <= LIMITE) break;
       }
       aplicar(melhor.ajuste);
-      // Coluna estreita demais para justificar sem espaços grandes: alinha esse texto à esquerda
-      if (melhor.folga > TOLERAVEL) {
-        aplicar(0);
-        el.style.textAlign = "left";
-      }
     });
   }
 

@@ -652,10 +652,5 @@ main p:not([class]), .secao__intro, .lead, .card__resumo, .pub__desc, .tcc__resu
 .fontes__nota, .galeria__nota, .mat__nota, .ficha__nota, .pub__nota, .lista-marcada li, .eixos li, .numero__texto {
   text-align: justify; text-align-last: left; -webkit-hyphens: manual; hyphens: manual; text-wrap: pretty;
 }
-/* em telas de celular a coluna é estreita demais para justificar sem hifenização: alinha à esquerda */
-@media (max-width: 600px) {
-  main p:not([class]), .secao__intro, .lead, .card__resumo, .pub__desc, .tcc__resumo, .premio__texto, .aviso, .nota-nome,
-  .fontes__nota, .galeria__nota, .mat__nota, .ficha__nota, .pub__nota, .lista-marcada li, .eixos li, .numero__texto { text-align: left; }
-}
 
 .sem-quebra { white-space: nowrap; }
