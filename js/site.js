@@ -267,23 +267,45 @@
       if (!el.offsetParent) return;
       var b = bloco(el);
       if (!b) return grupos.push([el]);
-      if (!porBloco.has(b)) grupos.push(porBloco.set(b, []).get(b));
+      if (!porBloco.has(b)) {
+        var novo = [];
+        novo.bloco = b;
+        grupos.push(novo);
+        porBloco.set(b, novo);
+      }
       porBloco.get(b).push(el);
     });
     return grupos;
   }
 
+  // Coluna centralizada na página (margens automáticas iguais dos dois lados)
+  function centralizada(el) {
+    var s = getComputedStyle(el), me = parseFloat(s.marginLeft), md = parseFloat(s.marginRight);
+    return me > 0 && Math.abs(me - md) < 1;
+  }
+
   function ajustar() {
     var itens = Array.prototype.slice.call(document.querySelectorAll(SELETOR));
     itens.forEach(function (el) { el.style.maxWidth = el.style.width = el.style.paddingLeft = el.style.paddingRight = ""; });
+    Array.prototype.forEach.call(document.querySelectorAll(COLUNAS), function (c) { c.style.maxWidth = ""; });
     agrupar(itens).forEach(function (grupo) {
       function folgaGrupo() { return Math.max.apply(null, grupo.map(folga)); }
       var melhor = { ajuste: 0, folga: folgaGrupo() };
       if (melhor.folga <= LIMITE) return;
-      var regs = grupo.map(regulador);
-      var minimo = Math.max.apply(null, regs.map(function (r) { return r.minimo; }));
-      var maximo = Math.min.apply(null, regs.map(function (r) { return r.maximo; }));
-      function aplicar(a) { regs.forEach(function (r) { r.aplicar(a); }); }
+      var minimo, maximo, aplicar, col = grupo.bloco;
+      if (col && centralizada(col)) {
+        // Coluna centralizada: varia a largura da própria coluna, que continua centralizada com títulos e parágrafos
+        var base = col.getBoundingClientRect().width, pai = col.parentElement, sp = getComputedStyle(pai);
+        var livre = pai.clientWidth - parseFloat(sp.paddingLeft) - parseFloat(sp.paddingRight) - base;
+        minimo = -Math.max(0, Math.min(livre, base * VARIACAO));
+        maximo = base * VARIACAO;
+        aplicar = function (a) { col.style.maxWidth = a ? base - a + "px" : ""; };
+      } else {
+        var regs = grupo.map(regulador);
+        minimo = Math.max.apply(null, regs.map(function (r) { return r.minimo; }));
+        maximo = Math.min.apply(null, regs.map(function (r) { return r.maximo; }));
+        aplicar = function (a) { regs.forEach(function (r) { r.aplicar(a); }); };
+      }
       // Testa a partir da largura original, alternando mais estreita e mais larga, e fica com a de menor folga
       for (var d = 4; d <= maximo; d += 4) {
         [d, -d].forEach(function (a) {

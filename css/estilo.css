@@ -334,11 +334,8 @@ h2, .secao__cab h2 {
 .nota-nome { font-size: .86rem; color: var(--texto-2); margin: 0; padding-top: 14px; border-top: 1px solid var(--linha); max-width: 80ch; }
 
 /* sobre */
-.sobre { display: grid; grid-template-columns: 168px minmax(0, 1fr); gap: clamp(24px, 5vw, 64px); align-items: start; }
-.sobre__foto { width: 168px; aspect-ratio: 1; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 6px var(--bg), 0 0 0 7px var(--linha-forte); margin-top: 6px; }
-.sobre__texto { max-width: 68ch; }
+.sobre__texto { max-width: 68ch; margin-inline: auto; }
 .sobre__texto p { font-size: 1.08rem; }
-@media (max-width: 640px) { .sobre { grid-template-columns: 1fr; } .sobre__foto { width: 120px; } }
 
 /* competências */
 .grupos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
