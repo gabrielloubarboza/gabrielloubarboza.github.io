@@ -214,7 +214,7 @@ h2, .secao__cab h2 {
 
 /* ------------------------------------------------------------------ hero */
 
-.hero { position: relative; padding-block: clamp(40px, 7vw, 104px) clamp(14px, 1.5vw, 20px); overflow: hidden; }
+.hero { position: relative; padding-block: clamp(40px, 7vw, 104px) clamp(24px, 2.5vw, 32px); overflow: hidden; }
 .hero::before {
   /* Quadrícula cartográfica discreta: referência visual de GIS, sem conteúdo informativo */
   content: ""; position: absolute; inset: 0 0 0 45%;
@@ -254,7 +254,7 @@ h2, .secao__cab h2 {
 
 /* ------------------------------------------------------------------ seções */
 
-.secao { padding-block: clamp(30px, 3.75vw, 48px); }
+.secao { padding-block: clamp(24px, 2.5vw, 32px); }
 .secao--clara { background: var(--bg-2); }
 .secao--escura { background: var(--escuro); color: var(--sobre-escuro); }
 .secao--escura a { color: var(--sobre-escuro); }
@@ -333,8 +333,12 @@ h2, .secao__cab h2 {
 .ficha-mini dt { font: 500 .72rem var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--texto-2); }
 .nota-nome { font-size: .86rem; color: var(--texto-2); margin: 0; padding-top: 14px; border-top: 1px solid var(--linha); max-width: 80ch; }
 
-/* sobre: texto de apresentação logo abaixo do topo, na largura do conteúdo */
-.secao--sobre { padding-top: 0; padding-bottom: clamp(20px, 2.5vw, 32px); }
+/* sobre: texto de apresentação logo abaixo dos botões do topo, 1,5x a largura da frase de abertura */
+/* largura em "ch" da frase de abertura (mesmo corpo de letra): 60ch = 1,5x os 40ch da frase */
+.sobre__texto { font-size: clamp(1.02rem, .98rem + .3vw, 1.15rem); width: 60ch; max-width: 100%; margin-top: 28px; }
+.hero__texto { min-width: 0; }
+/* telas largas: a caixa pode passar da coluna do topo sem alcançar a foto; nas demais, segue a coluna */
+@media (min-width: 1200px) { .sobre__texto { max-width: none; } }
 .sobre__texto p { font-size: 1.08rem; }
 .sobre__texto p:last-child { margin-bottom: 0; }
 
