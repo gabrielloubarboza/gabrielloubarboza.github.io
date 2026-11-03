@@ -214,7 +214,7 @@ h2, .secao__cab h2 {
 
 /* ------------------------------------------------------------------ hero */
 
-.hero { position: relative; padding-block: clamp(40px, 7vw, 104px) clamp(48px, 7vw, 96px); overflow: hidden; }
+.hero { position: relative; padding-block: clamp(40px, 7vw, 104px) clamp(28px, 3vw, 40px); overflow: hidden; }
 .hero::before {
   /* Quadrícula cartográfica discreta: referência visual de GIS, sem conteúdo informativo */
   content: ""; position: absolute; inset: 0 0 0 45%;
@@ -254,7 +254,7 @@ h2, .secao__cab h2 {
 
 /* ------------------------------------------------------------------ seções */
 
-.secao { padding-block: clamp(56px, 8vw, 112px); }
+.secao { padding-block: clamp(40px, 5vw, 64px); }
 .secao--clara { background: var(--bg-2); }
 .secao--escura { background: var(--escuro); color: var(--sobre-escuro); }
 .secao--escura a { color: var(--sobre-escuro); }
@@ -333,9 +333,10 @@ h2, .secao__cab h2 {
 .ficha-mini dt { font: 500 .72rem var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--texto-2); }
 .nota-nome { font-size: .86rem; color: var(--texto-2); margin: 0; padding-top: 14px; border-top: 1px solid var(--linha); max-width: 80ch; }
 
-/* sobre */
-.sobre__texto { max-width: 68ch; margin-inline: auto; }
+/* sobre: texto de apresentação logo abaixo do topo, na largura do conteúdo */
+.secao--sobre { padding-top: 0; }
 .sobre__texto p { font-size: 1.08rem; }
+.sobre__texto p:last-child { margin-bottom: 0; }
 
 /* competências */
 .grupos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
@@ -360,6 +361,8 @@ h2, .secao__cab h2 {
   background: var(--terra); box-shadow: 0 0 0 4px var(--bg);
 }
 .linha__item--discreto::before { background: var(--bg); border: 2px solid var(--linha-forte); }
+.secao--clara .linha__item::before { box-shadow: 0 0 0 4px var(--bg-2); }
+.secao--clara .linha__item--discreto::before { background: var(--bg-2); }
 .linha__item--discreto h4 { font-size: 1.08rem; }
 .linha__item--discreto p:last-child { font-size: .93rem; }
 .linha__periodo { font: 500 .78rem/1.4 var(--mono); letter-spacing: .04em; color: var(--oliva-esc); margin-bottom: 6px; }
