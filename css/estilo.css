@@ -254,7 +254,7 @@ h2, .secao__cab h2 {
 
 /* ------------------------------------------------------------------ seções */
 
-.secao { padding-block: clamp(24px, 2.5vw, 32px); }
+.secao { padding-block: clamp(42px, 6vw, 84px); }
 .secao--clara { background: var(--bg-2); }
 .secao--escura { background: var(--escuro); color: var(--sobre-escuro); }
 .secao--escura a { color: var(--sobre-escuro); }
