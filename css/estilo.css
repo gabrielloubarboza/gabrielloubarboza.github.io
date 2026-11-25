@@ -515,8 +515,6 @@ h2, .secao__cab h2 {
 .selecao p { color: var(--sobre-escuro-2); }
 .selecao__nota { font-size: .86rem; margin: 0; }
 
-.secao--limites { padding-block: clamp(48px, 6vw, 80px); border-top: 1px solid var(--linha); }
-.secao--limites h2 { margin-bottom: 28px; }
 .lista-marcada--colunas { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
 @media (max-width: 900px) { .lista-marcada--colunas { grid-template-columns: 1fr; } }
 .lista-marcada--colunas li { padding: 16px 0 0; border-top: 2px solid var(--terra); font-size: .98rem; }
